@@ -1,0 +1,198 @@
+import { Button, VerticalBox, HorizontalBox, LineEdit, TabWidget } from "std-widgets.slint";
+
+export component AppWindow inherits Window {
+    title: "音频播放器 - MMIO & MCI";
+    preferred-width: 800px;
+    preferred-height: 600px;
+
+    in-out property <string> mmio-path: "";
+    in-out property <string> mci-path: "";
+    in-out property <string> record-path: "";
+    
+    in-out property <string> mmio-status: "就绪";
+    in-out property <string> mci-status: "就绪";
+    in-out property <bool> mci-is-open: false;
+    in-out property <bool> mci-is-recording: false;
+
+    callback mmio-play-file(string);
+    callback play-sound-sync(string);
+    callback play-sound-async(string);
+    callback play-sound-loop(string);
+    callback stop-sound();
+    
+    callback mci-open-file(string);
+    callback mci-play();
+    callback mci-pause();
+    callback mci-resume();
+    callback mci-stop();
+    callback mci-close();
+    callback mci-record();
+    callback mci-save-recording(string);
+
+    TabWidget {
+        Tab {
+            title: "MMIO 播放";
+            
+            VerticalBox {
+                padding: 20px;
+                spacing: 10px;
+
+                Text {
+                    text: "MMIO 底层播放 (WaveOut API)";
+                    font-size: 18px;
+                    font-weight: 700;
+                }
+
+                HorizontalBox {
+                    Text { text: "WAV 文件路径:"; vertical-alignment: center; }
+                    LineEdit {
+                        text <=> mmio-path;
+                        placeholder-text: "例如: C:\\test.wav";
+                    }
+                }
+
+                HorizontalBox {
+                    spacing: 10px;
+                    Button {
+                        text: "MMIO 播放";
+                        clicked => { mmio-play-file(mmio-path); }
+                    }
+                    Button {
+                        text: "同步播放";
+                        clicked => { play-sound-sync(mmio-path); }
+                    }
+                    Button {
+                        text: "异步播放";
+                        clicked => { play-sound-async(mmio-path); }
+                    }
+                    Button {
+                        text: "循环播放";
+                        clicked => { play-sound-loop(mmio-path); }
+                    }
+                    Button {
+                        text: "停止";
+                        clicked => { stop-sound(); }
+                    }
+                }
+
+                Rectangle {
+                    height: 100px;
+                    background: #f0f0f0;
+                    border-radius: 5px;
+                    
+                    VerticalBox {
+                        padding: 10px;
+                        Text {
+                            text: mmio-status;
+                            wrap: word-wrap;
+                        }
+                    }
+                }
+            }
+        }
+
+        Tab {
+            title: "MCI 控制";
+            
+            VerticalBox {
+                padding: 20px;
+                spacing: 10px;
+
+                Text {
+                    text: "MCI 媒体控制接口";
+                    font-size: 18px;
+                    font-weight: 700;
+                }
+
+                HorizontalBox {
+                    Text { text: "文件路径:"; vertical-alignment: center; }
+                    LineEdit {
+                        text <=> mci-path;
+                        placeholder-text: "例如: C:\\music.mp3";
+                    }
+                    Button {
+                        text: "打开";
+                        clicked => { mci-open-file(mci-path); }
+                    }
+                }
+
+                HorizontalBox {
+                    spacing: 10px;
+                    Button {
+                        text: "播放";
+                        enabled: mci-is-open;
+                        clicked => { mci-play(); }
+                    }
+                    Button {
+                        text: "暂停";
+                        enabled: mci-is-open;
+                        clicked => { mci-pause(); }
+                    }
+                    Button {
+                        text: "继续";
+                        enabled: mci-is-open;
+                        clicked => { mci-resume(); }
+                    }
+                    Button {
+                        text: "停止";
+                        enabled: mci-is-open;
+                        clicked => { mci-stop(); }
+                    }
+                    Button {
+                        text: "关闭";
+                        enabled: mci-is-open;
+                        clicked => { mci-close(); }
+                    }
+                }
+
+                Rectangle {
+                    height: 2px;
+                    background: #ccc;
+                }
+
+                Text {
+                    text: "录音功能";
+                    font-size: 16px;
+                    font-weight: 600;
+                }
+
+                HorizontalBox {
+                    Text { text: "保存路径:"; vertical-alignment: center; }
+                    LineEdit {
+                        text <=> record-path;
+                        placeholder-text: "例如: C:\\recording.wav";
+                    }
+                }
+
+                HorizontalBox {
+                    spacing: 10px;
+                    Button {
+                        text: "开始录音";
+                        enabled: !mci-is-recording;
+                        clicked => { mci-record(); }
+                    }
+                    Button {
+                        text: "保存录音";
+                        enabled: mci-is-recording;
+                        clicked => { mci-save-recording(record-path); }
+                    }
+                }
+
+
+                Rectangle {
+                    height: 100px;
+                    background: #f0f0f0;
+                    border-radius: 5px;
+                    
+                    VerticalBox {
+                        padding: 10px;
+                        Text {
+                            text: mci-status;
+                            wrap: word-wrap;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
